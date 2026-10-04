@@ -1,0 +1,1143 @@
+<title>ExoBoot Preference Learning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root {
+  --ground: #F6F7F9;
+  --surface: #FFFFFF;
+  --surface-sunk: #EFF1F5;
+  --ink: #14181F;
+  --ink-soft: #333C4B;
+  --muted: #5C667A;
+  --rule: #DFE4EB;
+  --rule-strong: #C6CEDA;
+  --accent: #BF5700;
+  --accent-ink: #A04800;
+  --accent-tint: #FBEFE5;
+  --grid: #D9DFE8;
+  --shadow: 0 1px 2px rgba(20, 24, 31, .05), 0 8px 24px -16px rgba(20, 24, 31, .28);
+
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E1116;
+    --surface: #161A21;
+    --surface-sunk: #12161C;
+    --ink: #E6EAF1;
+    --ink-soft: #C7CEDA;
+    --muted: #8E99AC;
+    --rule: #242A34;
+    --rule-strong: #333B48;
+    --accent: #FF8B42;
+    --accent-ink: #FFA163;
+    --accent-tint: #2A1A0E;
+    --grid: #232935;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground: #0E1116;
+  --surface: #161A21;
+  --surface-sunk: #12161C;
+  --ink: #E6EAF1;
+  --ink-soft: #C7CEDA;
+  --muted: #8E99AC;
+  --rule: #242A34;
+  --rule-strong: #333B48;
+  --accent: #FF8B42;
+  --accent-ink: #FFA163;
+  --accent-tint: #2A1A0E;
+  --grid: #232935;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 clamp(1.15rem, 4vw, 3rem) 6rem;
+}
+
+/* ---------- masthead ---------- */
+
+.masthead {
+  padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(1.75rem, 4vw, 2.75rem);
+  border-bottom: 2px solid var(--ink);
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem .85rem;
+  align-items: baseline;
+}
+.eyebrow .sep { color: var(--rule-strong); }
+.eyebrow .plain { color: var(--muted); }
+
+h1 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 5.4vw, 3.15rem);
+  line-height: 1.06;
+  letter-spacing: -.022em;
+  text-wrap: balance;
+  margin: 1.1rem 0 0;
+  max-width: 19ch;
+}
+
+.standfirst {
+  margin: 1.1rem 0 0;
+  font-size: clamp(1.075rem, 2vw, 1.2rem);
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+.roster {
+  margin-top: 2.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.roster div {
+  background: var(--ground);
+  padding: .85rem 1rem .95rem;
+}
+.roster dt {
+  font-family: var(--mono);
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.roster dd {
+  margin: .3rem 0 0;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: .96rem;
+  line-height: 1.4;
+  letter-spacing: -.005em;
+}
+.roster dd small {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 400;
+  font-size: .72rem;
+  letter-spacing: 0;
+  color: var(--muted);
+  margin-top: .15rem;
+}
+
+/* ---------- sections ---------- */
+
+section {
+  padding-top: clamp(2.75rem, 6vw, 4.25rem);
+}
+
+.sec-head {
+  display: flex;
+  align-items: baseline;
+  gap: .8rem;
+  border-top: 1px solid var(--rule);
+  padding-top: .75rem;
+  margin-bottom: 1.5rem;
+}
+section:first-of-type .sec-head { border-top: none; padding-top: 0; }
+
+.sec-head .tag {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  white-space: nowrap;
+  padding-top: .3rem;
+}
+
+h2 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.7vw, 1.8rem);
+  line-height: 1.2;
+  letter-spacing: -.017em;
+  text-wrap: balance;
+  margin: 0;
+}
+
+h3 {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: -.008em;
+  line-height: 1.35;
+  margin: 2rem 0 .55rem;
+}
+
+p { margin: 0 0 1.05rem; max-width: 66ch; }
+p:last-child { margin-bottom: 0; }
+
+a { color: var(--accent-ink); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { text-decoration-thickness: 2px; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+code, .mono { font-family: var(--mono); font-size: .855em; }
+code {
+  background: var(--surface-sunk);
+  border: 1px solid var(--rule);
+  padding: .08em .34em;
+  border-radius: 3px;
+}
+
+strong { font-weight: 600; color: var(--ink); }
+em { font-style: italic; }
+
+.lede { font-size: 1.13rem; line-height: 1.62; color: var(--ink-soft); max-width: 60ch; }
+
+blockquote {
+  margin: 0 0 1.5rem;
+  padding: 1.15rem 0 1.15rem 1.5rem;
+  border-left: 3px solid var(--accent);
+  font-size: .99rem;
+  line-height: 1.66;
+  color: var(--ink-soft);
+  max-width: 68ch;
+}
+blockquote .attrib {
+  display: block;
+  margin-top: .8rem;
+  font-family: var(--mono);
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ---------- figures ---------- */
+
+figure {
+  margin: 1.75rem 0 1.9rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow);
+}
+.fig-body { padding: 1.15rem 1.15rem .5rem; overflow-x: auto; }
+figure svg { display: block; width: 100%; min-width: 520px; height: auto; }
+figcaption {
+  padding: .85rem 1.15rem 1rem;
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: .755rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+figcaption b { color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- question pair ---------- */
+
+.questions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0 0;
+}
+.q {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-top: 3px solid var(--rule-strong);
+  padding: 1.25rem 1.35rem 1.4rem;
+}
+.q.open { border-top-color: var(--accent); }
+.q .qtag {
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.q.open .qtag { color: var(--accent-ink); }
+.q h3 { margin: .55rem 0 .5rem; font-size: 1.08rem; }
+.q p { font-size: .96rem; line-height: 1.6; margin: 0; }
+
+/* ---------- spec table ---------- */
+
+.tablewrap { overflow-x: auto; margin: 1.5rem 0; border: 1px solid var(--rule); background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 440px; }
+th, td {
+  text-align: left;
+  padding: .62rem 1rem;
+  border-bottom: 1px solid var(--rule);
+  font-size: .9rem;
+  vertical-align: baseline;
+}
+tr:last-child td { border-bottom: none; }
+th {
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--surface-sunk);
+  white-space: nowrap;
+}
+td:first-child { font-family: var(--mono); font-size: .8rem; color: var(--ink-soft); white-space: nowrap; }
+td.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- repo list ---------- */
+
+.repos { list-style: none; padding: 0; margin: 1.4rem 0 0; display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.repos li { background: var(--surface); padding: .95rem 1.1rem 1.05rem; }
+.repos .name { font-family: var(--mono); font-size: .855rem; font-weight: 600; color: var(--accent-ink); }
+.repos p { margin: .3rem 0 0; font-size: .93rem; line-height: 1.58; color: var(--ink-soft); }
+
+/* ---------- people ---------- */
+
+.people { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1.4rem; }
+.person { border-top: 2px solid var(--ink); padding-top: .95rem; }
+.person .who { font-family: var(--display); font-weight: 700; font-size: 1.12rem; letter-spacing: -.012em; }
+.person .role { font-family: var(--mono); font-size: .715rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-top: .2rem; }
+.person p { font-size: .94rem; line-height: 1.62; margin: .85rem 0 0; }
+
+/* ---------- reading list ---------- */
+
+.tier-label {
+  font-family: var(--mono);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 2.25rem 0 .9rem;
+  padding-bottom: .45rem;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+}
+.tier-label span:last-child { font-weight: 400; text-transform: none; letter-spacing: .02em; font-size: .74rem; }
+
+.papers { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
+.paper {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  padding: 1.1rem 1.25rem 1.2rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0 1rem;
+  align-items: start;
+}
+.paper.key { border-color: var(--accent); background: var(--accent-tint); }
+.paper .idx {
+  font-family: var(--mono);
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  padding-top: .12rem;
+}
+.paper.key .idx { color: var(--accent-ink); }
+.paper .cite { font-family: var(--display); font-weight: 600; font-size: 1rem; line-height: 1.4; letter-spacing: -.008em; }
+.paper .venue { font-family: var(--mono); font-size: .715rem; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-top: .3rem; }
+.paper .takeaway { grid-column: 2; margin: .7rem 0 0; font-size: .945rem; line-height: 1.62; color: var(--ink-soft); max-width: 62ch; }
+.paper .takeaway + .takeaway { margin-top: .55rem; }
+
+.callout {
+  margin: 1.6rem 0;
+  background: var(--accent-tint);
+  border: 1px solid var(--accent);
+  padding: 1.2rem 1.35rem 1.3rem;
+}
+.callout .ctag {
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+}
+.callout p { margin: .5rem 0 0; font-size: .96rem; line-height: 1.62; }
+
+/* ---------- skills ---------- */
+
+.skills { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; margin-top: 1.4rem; }
+.skills h3 { margin-top: 0; }
+.skills ul { padding-left: 1.1rem; margin: 0; }
+.skills li { font-size: .93rem; line-height: 1.58; margin-bottom: .5rem; color: var(--ink-soft); }
+
+/* ---------- logistics ---------- */
+
+.flags { display: grid; gap: 1px; background: var(--rule); border: 1px solid var(--rule); margin-top: 1.4rem; }
+.flag { background: var(--surface); padding: 1rem 1.15rem 1.1rem; display: grid; grid-template-columns: auto 1fr; gap: 0 .9rem; align-items: start; }
+.flag .marker {
+  width: 7px; height: 7px; margin-top: .55rem;
+  background: var(--muted); border-radius: 50%;
+}
+.flag.urgent .marker { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-tint); }
+.flag .ftitle { font-family: var(--display); font-weight: 600; font-size: .98rem; letter-spacing: -.006em; }
+.flag p { grid-column: 2; margin: .35rem 0 0; font-size: .925rem; line-height: 1.6; color: var(--ink-soft); }
+
+.deliverables { list-style: none; padding: 0; margin: 1.3rem 0 0; }
+.deliverables li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  padding: .62rem 0;
+  border-bottom: 1px dashed var(--rule);
+  font-size: .945rem;
+  align-items: baseline;
+}
+.deliverables li:last-child { border-bottom: none; }
+.deliverables .meta { font-family: var(--mono); font-size: .74rem; color: var(--muted); text-align: right; white-space: nowrap; }
+
+/* ---------- ask list ---------- */
+
+.asks { display: grid; gap: 1.6rem; margin-top: 1.4rem; }
+.askgroup h3 { margin: 0 0 .7rem; font-size: .78rem; font-family: var(--mono); font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: var(--accent-ink); }
+.askgroup ol { margin: 0; padding-left: 1.4rem; }
+.askgroup li { font-size: .955rem; line-height: 1.6; margin-bottom: .6rem; color: var(--ink-soft); }
+.askgroup li::marker { font-family: var(--mono); font-size: .82rem; color: var(--muted); }
+
+/* ---------- plan ---------- */
+
+.weeks { display: grid; gap: 1.25rem; margin-top: 1.4rem; }
+.week { background: var(--surface); border: 1px solid var(--rule); }
+.week > header {
+  display: flex; align-items: baseline; gap: .85rem; flex-wrap: wrap;
+  padding: .9rem 1.2rem;
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface-sunk);
+}
+.week .wnum { font-family: var(--mono); font-size: .7rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: var(--accent-ink); }
+.week .wname { font-family: var(--display); font-weight: 600; font-size: 1.02rem; letter-spacing: -.008em; }
+.week ul { list-style: none; margin: 0; padding: .55rem 1.2rem 1rem; display: grid; gap: .1rem; }
+
+.task { display: block; }
+.task label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .75rem;
+  align-items: start;
+  padding: .5rem 0;
+  cursor: pointer;
+  font-size: .945rem;
+  line-height: 1.58;
+  color: var(--ink-soft);
+}
+.task input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 17px; height: 17px;
+  margin: .22rem 0 0;
+  border: 1.5px solid var(--rule-strong);
+  border-radius: 3px;
+  background: var(--ground);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  flex: none;
+}
+.task input::before {
+  content: "";
+  width: 9px; height: 9px;
+  transform: scale(0);
+  background: var(--surface);
+  clip-path: polygon(14% 46%, 0 60%, 39% 100%, 100% 22%, 86% 8%, 38% 71%);
+  transition: transform .12s ease-out;
+}
+.task input:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.task input:checked::before { transform: scale(1); }
+.task input:checked ~ .tasktext { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--rule-strong); }
+
+.planfoot {
+  margin-top: 1rem;
+  font-family: var(--mono);
+  font-size: .73rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ---------- closing ---------- */
+
+.closer {
+  margin-top: clamp(2.75rem, 6vw, 4.25rem);
+  border-top: 2px solid var(--ink);
+  padding-top: 1.6rem;
+}
+.closer p { font-size: 1.06rem; line-height: 1.66; }
+.closer .kicker {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  letter-spacing: -.015em;
+  line-height: 1.28;
+  max-width: 30ch;
+  margin: 1.4rem 0 0;
+  text-wrap: balance;
+}
+
+.sources { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--rule); }
+.sources h2 { font-size: .78rem; font-family: var(--mono); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.sources ul { list-style: none; padding: 0; margin: 1rem 0 0; columns: 2; column-gap: 2.5rem; }
+.sources li { break-inside: avoid; font-size: .84rem; line-height: 1.5; margin-bottom: .55rem; }
+@media (max-width: 620px) { .sources ul { columns: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="page">
+
+<header class="masthead">
+  <div class="eyebrow">
+    <span>FIRE &middot; ME 177K</span>
+    <span class="sep">/</span>
+    <span>Fall 2026</span>
+    <span class="sep">/</span>
+    <span class="plain">Topic #2 &mdash; Biorobotics &amp; Biomechanical Engineering</span>
+  </div>
+
+  <h1>Teaching an ExoBoot what you like</h1>
+
+  <p class="standfirst">A prep brief for our semester in the Systems for Augmenting Human Mechanics Lab: what the project actually is, what to read first, and what to do before we touch the hardware.</p>
+
+  <dl class="roster">
+    <div>
+      <dt>Team</dt>
+      <dd>Ojas, Asiya, Tarun</dd>
+    </div>
+    <div>
+      <dt>Graduate mentor</dt>
+      <dd>Finn Eagen<small>Walker ME &middot; day-to-day</small></dd>
+    </div>
+    <div>
+      <dt>Faculty</dt>
+      <dd>Dr. Nicholas P. Fey<small>nfey@utexas.edu &middot; AHG 2.304MB</small></dd>
+    </div>
+    <div>
+      <dt>Lab</dt>
+      <dd>SAHM<small>Walker ME &middot; Texas Robotics</small></dd>
+    </div>
+  </dl>
+</header>
+
+<!-- ============ THE PROBLEM ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">The brief</span>
+    <h2>What we were actually handed</h2>
+  </div>
+
+  <blockquote>
+    Human mobility is a central goal for happiness and quality of life. Yet, mobility-impaired individuals have few options with respect to wearable assistive technologies that enable movement during the widely-varying scenarios that are encountered during daily life. The Dephy ExoBoot is an ankle exoskeleton designed to assist users when walking or running, but currently there is little control for the user to personalize their experience and comfort while using the ExoBoot&hellip; The project will explore different online learning methods to incorporate user preference when using the ExoBoot, and to extend these methods across variable ambulation scenarios that are encountered during daily life.
+    <span class="attrib">Slide 3, Topic #2 &mdash; problem statement, abridged</span>
+  </blockquote>
+
+  <p class="lede">Underneath the framing, this is a search problem with a human in the loop. The boot applies one torque pulse per stride, and that pulse is defined by about four numbers.</p>
+
+  <figure>
+    <div class="fig-body">
+      <svg viewBox="0 0 720 350" role="img" aria-label="Ankle exoskeleton torque profile plotted against percent of stride, with the four tunable parameters annotated: rise time, peak timing at about 53 percent, peak magnitude at about 22 newton-metres, and fall time ending near toe-off at 64 percent.">
+        <defs>
+          <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.22"/>
+            <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.02"/>
+          </linearGradient>
+        </defs>
+
+        <!-- gridlines -->
+        <g stroke="var(--grid)" stroke-width="1">
+          <line x1="70" y1="30"  x2="690" y2="30"/>
+          <line x1="70" y1="103" x2="690" y2="103"/>
+          <line x1="70" y1="177" x2="690" y2="177"/>
+        </g>
+
+        <!-- y ticks -->
+        <g fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="end">
+          <text x="60" y="34">30</text>
+          <text x="60" y="107">20</text>
+          <text x="60" y="181">10</text>
+          <text x="60" y="254">0</text>
+        </g>
+        <text x="22" y="140" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="11"
+              transform="rotate(-90 22 140)" text-anchor="middle">torque (N&middot;m)</text>
+
+        <!-- stance / swing band, split at toe-off -->
+        <rect x="70" y="250" width="396.8" height="7" fill="var(--rule-strong)"/>
+        <rect x="466.8" y="250" width="223.2" height="7" fill="var(--rule)"/>
+        <text x="268" y="278" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" letter-spacing="1">STANCE</text>
+        <text x="578" y="278" fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" letter-spacing="1">SWING</text>
+
+        <!-- torque curve fill -->
+        <path fill="url(#fillGrad)" stroke="none"
+              d="M 243.6 250 C 290 250 330 190 360 130 C 380 95 390 89 398.6 88.7 C 415 88 430 140 445 190 C 455 225 462 245 466.8 250 Z"/>
+        <!-- torque curve -->
+        <path fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+              d="M 70 250 L 243.6 250 C 290 250 330 190 360 130 C 380 95 390 89 398.6 88.7 C 415 88 430 140 445 190 C 455 225 462 245 466.8 250 L 690 250"/>
+
+        <!-- peak guides -->
+        <g stroke="var(--ink-soft)" stroke-width="1" stroke-dasharray="3 3" opacity="0.55">
+          <line x1="70" y1="88.7" x2="398.6" y2="88.7"/>
+          <line x1="398.6" y1="88.7" x2="398.6" y2="250"/>
+        </g>
+        <circle cx="398.6" cy="88.7" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>
+
+        <!-- parameter callouts -->
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink)">
+          <text x="412" y="72" font-weight="600">peak magnitude</text>
+          <text x="412" y="88" fill="var(--muted)" font-size="10.5">how hard it pushes</text>
+
+          <text x="390" y="203" font-weight="600" text-anchor="end">peak time</text>
+          <text x="390" y="218" fill="var(--muted)" font-size="10.5" text-anchor="end">when it pushes</text>
+        </g>
+
+        <!-- rise bracket -->
+        <g stroke="var(--ink-soft)" stroke-width="1.2" fill="none" opacity="0.75">
+          <path d="M 243.6 160 L 243.6 152 L 396 152 L 396 144"/>
+        </g>
+        <text x="250" y="144" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink)" font-weight="600">rise time</text>
+
+        <!-- fall bracket -->
+        <g stroke="var(--ink-soft)" stroke-width="1.2" fill="none" opacity="0.75">
+          <path d="M 401 200 L 401 208 L 466.8 208 L 466.8 216"/>
+        </g>
+        <text x="474" y="212" font-family="IBM Plex Mono, monospace" font-size="11" fill="var(--ink)" font-weight="600">fall time</text>
+
+        <!-- toe-off marker -->
+        <line x1="466.8" y1="250" x2="466.8" y2="266" stroke="var(--muted)" stroke-width="1.2"/>
+        <text x="472" y="264" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">toe-off</text>
+
+        <!-- x axis -->
+        <line x1="70" y1="250" x2="690" y2="250" stroke="var(--ink-soft)" stroke-width="1.5"/>
+        <g fill="var(--muted)" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">
+          <text x="70"  y="303">0</text>
+          <text x="225" y="303">25</text>
+          <text x="380" y="303">50</text>
+          <text x="535" y="303">75</text>
+          <text x="690" y="303">100</text>
+          <text x="380" y="326" font-size="11.5">% of stride</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>The search space.</b> A representative plantarflexion assist profile. Everything the wearer feels is set by these four numbers &mdash; and the "right" values differ from person to person. Shape is illustrative; real magnitudes depend on the boot, the user, and the task.</figcaption>
+  </figure>
+
+  <div class="questions">
+    <div class="q">
+      <div class="qtag">Question one &middot; well-trodden</div>
+      <h3>Learning a preference online</h3>
+      <p>A person can reliably tell you <em>"A feels better than B."</em> They cannot tell you <em>"my optimum is 22.4&nbsp;N&middot;m at 53% stride."</em> So: search a continuous space from noisy pairwise feedback, in few enough trials that someone will actually sit through it. There is real prior art here &mdash; we're building on it, not inventing it.</p>
+    </div>
+    <div class="q open">
+      <div class="qtag">Question two &middot; genuinely open</div>
+      <h3>Carrying it across contexts</h3>
+      <p>A preference learned on a treadmill at 1.2&nbsp;m/s is one point in a much larger space. Daily life is ramps, stairs, sit-to-stand, speed changes, jogging. Do you re-run the whole optimization every time the terrain changes &mdash; or can a context-conditioned model warm-start the next one?</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HARDWARE ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Hardware</span>
+    <h2>The Dephy ExoBoot</h2>
+  </div>
+
+  <p>It's the workhorse research ankle exo &mdash; Michigan's Neurobionics Lab, Georgia Tech, and Northeastern all publish on it. That matters more than it sounds: there is a lot of open code and open data we can stand on instead of writing from scratch.</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th scope="col">Property</th><th scope="col">Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>actuation</td><td>Brushless DC motor on a rigid shank, belt-drive transmission onto a boot-mounted strut</td></tr>
+        <tr><td>assists</td><td>Ankle plantarflexion &mdash; push-off, primarily</td></tr>
+        <tr><td>mass</td><td class="num">~1.5 kg (3.4 lb) per side</td></tr>
+        <tr><td>sensing</td><td>IMU(s) and an ankle joint encoder</td></tr>
+        <tr><td>power</td><td>Battery module on the shin pad, below the knee</td></tr>
+        <tr><td>models</td><td>EB-51 and EB60 both appear in the literature &mdash; ask Finn which we have</td></tr>
+        <tr><td>sold as</td><td>Dephy Sidekick</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Repositories to clone before week three</h3>
+  <ul class="repos">
+    <li>
+      <span class="name">DephyInc/Actuator-Package</span>
+      <p>Dephy's official Python API (<code>flexsea</code>). How you read the sensor stream and command torque. Start here.</p>
+    </li>
+    <li>
+      <span class="name">neurobionics/opensourceleg</span>
+      <p>An SDK wrapping Dephy actuators behind a clean, consistent API. <code>pip install opensourceleg[dephy]</code>. Probably our fastest path to a working control loop.</p>
+    </li>
+    <li>
+      <span class="name">neurobionics/Exoboot-Controller-VAS</span>
+      <p>A mid-level controller for EB-51 boots, written for a study mapping a user's <em>value landscape</em> across a range of exoskeleton torques. Almost exactly our problem shape &mdash; read this one closely.</p>
+    </li>
+    <li>
+      <span class="name">maxshep/Exoboot_Code</span>
+      <p>Max Shepherd's ExoBoot code from Northeastern; he co-authors the uncertainty-aware paper below.</p>
+    </li>
+  </ul>
+</section>
+
+<!-- ============ PEOPLE ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Who we're working with</span>
+    <h2>Fey and Eagen</h2>
+  </div>
+
+  <div class="people">
+    <div class="person">
+      <div class="who">Dr. Nicholas P. Fey</div>
+      <div class="role">Associate Professor &middot; Faculty sponsor</div>
+      <p>BS, MS, and PhD in ME &mdash; all from UT Austin. Postdoc at the Shirley Ryan AbilityLab and Northwestern Feinberg. Now core faculty in Texas Robotics, directing the SAHM Lab.</p>
+      <p>His program sits at rehabilitation robotics &cap; neuromuscular biomechanics: lower-limb prostheses and orthoses, intent recognition, optimal control, sonomyographic and myoelectric sensing. The recurring phrase across his work is <em>diverse and transient forms of human ambulation</em> &mdash; which is precisely why the second half of our project exists. Funded by DoD, NIH, and NSF.</p>
+    </div>
+    <div class="person">
+      <div class="who">Finn Eagen</div>
+      <div class="role">PhD student &middot; Our direct mentor</div>
+      <p>Works on applied machine learning for biomechanics and human movement, aimed at the control of robotic assistive devices &mdash; including using mobile sensors to predict biomechanical objectives <em>outside a traditional lab space</em>.</p>
+      <p>That last part is worth noting. "Outside the lab" is the same instinct as "variable ambulation scenarios encountered during daily life." Expect him to care about methods that survive contact with the real world, not just clean treadmill results. In FIRE the graduate mentor sets the weekly agenda and the faculty member reviews &mdash; so optimize for being useful to Finn.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="ctag">Small thing, gets noticed</div>
+    <p>It's <strong>Eagen</strong>, not Eagan. Worth getting right on the first email.</p>
+  </div>
+</section>
+
+<!-- ============ READING ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Reading</span>
+    <h2>What to read, in what order</h2>
+  </div>
+
+  <p>Read the first three properly, before the first real lab meeting. Skim the rest by week four. Turning up having actually read Lee&nbsp;2023 is the difference between a vague proposal and a good one.</p>
+
+  <div class="tier-label"><span>Tier one</span><span>read properly</span></div>
+
+  <ol class="papers">
+    <li class="paper key">
+      <span class="idx">01</span>
+      <div>
+        <div class="cite">User preference optimization for control of ankle exoskeletons using sample efficient active learning</div>
+        <div class="venue">Lee, Shetty, Franks, Tan, Evangelopoulos, Ha &amp; Rouse &middot; Science Robotics 8(83) &middot; 2023</div>
+      </div>
+      <p class="takeaway">The closest published ancestor of our project. Ankle exoskeleton, preference-only feedback, real time. An evolutionary algorithm proposes candidate parameter sets; a <strong>RankNet</strong> pretrained on earlier human preference data ranks them. It converged in <strong>43 &plusmn; 7 queries</strong> at 88% accuracy against randomly generated parameters. The press framing &mdash; tuning an exoskeleton like tuning a radio station &mdash; is worth stealing for our poster.</p>
+      <p class="takeaway"><strong>The data is public.</strong> The Dryad set (<code>doi:10.5061/dryad.p5hqbzktp</code>, ~712&nbsp;KB, freely licensed) holds 13 subjects &times; 3 trials of real forced-choice comparisons at 1.2&nbsp;m/s, in Excel with a README. We can do genuine analysis on this in week one &mdash; no hardware, no IRB. This is the highest-leverage item on the whole page.</p>
+    </li>
+
+    <li class="paper">
+      <span class="idx">02</span>
+      <div>
+        <div class="cite">Human-in-the-loop optimization of exoskeleton assistance during walking</div>
+        <div class="venue">Zhang, Fiers, Witte, Jackson, Poggensee, Atkeson &amp; Collins &middot; Science 356:1280&ndash;1284 &middot; 2017</div>
+      </div>
+      <p class="takeaway">The foundational HIL paper. CMA-ES over a four-parameter ankle torque profile, with metabolic rate from indirect calorimetry as the objective. It got a <strong>24.2 &plusmn; 7.4% metabolic reduction</strong> &mdash; but took over an hour per participant. Read it to understand <em>why preference-based methods exist at all</em>: metabolic measurement is slow, noisy, expensive, tethered, and, crucially, not what the user actually wants. Our project is a reaction to this paper's limitations.</p>
+    </li>
+
+    <li class="paper">
+      <span class="idx">03</span>
+      <div>
+        <div class="cite">Uncertainty-Aware Ankle Exoskeleton Control</div>
+        <div class="venue">Tourk, Galoaa, Shajan, Everett, Young &amp; Shepherd &middot; arXiv:2508.21221 &middot; 2025</div>
+      </div>
+      <p class="takeaway">Runs directly on the Dephy ExoBoot EB60. An ensemble of seven temporal convolutional networks estimates gait phase; a parallel estimator flags incoming sensor data as in- or out-of-distribution. Familiar movement gets assistive torque; novel movement drops to zero for safety. Trained on treadmill walking and jogging at varied speeds and inclines, then tested online across ramps, stairs, jumping, sit-to-stand and plyometrics &mdash; 97.7% F1 offline, 89.2% online on a new user.</p>
+      <p class="takeaway">This is the state of the art on our "variable ambulation" half. Note carefully what it does <em>not</em> do: it handles novelty by refusing to help. That refusal is the opening.</p>
+    </li>
+  </ol>
+
+  <div class="tier-label"><span>Tier two</span><span>skim for method</span></div>
+
+  <ol class="papers" start="4">
+    <li class="paper">
+      <span class="idx">04</span>
+      <div>
+        <div class="cite">The role of user preference in the customized control of robotic exoskeletons</div>
+        <div class="venue">Ingraham, Remy &amp; Rouse &middot; Science Robotics &middot; 2022</div>
+      </div>
+      <p class="takeaway">Why preference is a legitimate objective at all, and where it diverges from metabolic cost. One usefully concrete finding for experiment design: at faster walking speeds, people are <em>more precise</em> at identifying their preferred assistance magnitude.</p>
+    </li>
+    <li class="paper">
+      <span class="idx">05</span>
+      <div>
+        <div class="cite">Preference-Based Learning for Exoskeleton Gait Optimization &middot; and the high-dimensional follow-up</div>
+        <div class="venue">Tucker et al. &middot; arXiv:1909.12316 and arXiv:2003.06495 &middot; 2019&ndash;2020</div>
+      </div>
+      <p class="takeaway">Introduces <strong>CoSpar</strong>, which asks for pairwise preferences <em>and</em> coactive suggestions ("make it more like that"). A good model of designing the algorithm around what humans can actually report.</p>
+    </li>
+    <li class="paper">
+      <span class="idx">06</span>
+      <div>
+        <div class="cite">Rapid Online Learning of Hip Exoskeleton Assistance Preferences</div>
+        <div class="venue">arXiv:2502.15366 &middot; 2025</div>
+      </div>
+      <p class="takeaway">Hip rather than ankle, but a clean protocol template. Bayesian preference learning by Metropolis&ndash;Hastings via the APReL library, over six torque features, with a linear reward and a soft-max response model. Just <strong>12 pairwise comparisons</strong> per session: 20&nbsp;s on A, 5&nbsp;s rest, 20&nbsp;s on B, then say which. Its own stated limitations &mdash; one walking speed, linear reward, no energetics &mdash; are literally our opening.</p>
+    </li>
+    <li class="paper">
+      <span class="idx">07</span>
+      <div>
+        <div class="cite">Personalizing exoskeleton assistance while walking in the real world</div>
+        <div class="venue">Slade, Kochenderfer, Delp &amp; Collins &middot; Nature &middot; 2022</div>
+      </div>
+      <p class="takeaway">Data-driven optimization outdoors using wearable sensors instead of a metabolic cart &mdash; as effective as the lab method and <strong>four times faster</strong>. The "get out of the lab" argument, and squarely aligned with what Finn works on.</p>
+    </li>
+    <li class="paper">
+      <span class="idx">08</span>
+      <div>
+        <div class="cite">AI-driven universal lower-limb exoskeleton system for community ambulation</div>
+        <div class="venue">Science Advances</div>
+      </div>
+      <p class="takeaway">Switches assistance type between locomotion modes and modulates by ground slope, user-independent, with no separate mode classifier. Read it as a foil: it generalizes across <em>contexts</em> but not across <em>people</em>.</p>
+    </li>
+  </ol>
+</section>
+
+<!-- ============ THE GAP ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">The opening</span>
+    <h2>Where the actual opportunity is</h2>
+  </div>
+
+  <p>Put the literature on two axes and the shape of the gap becomes obvious. One body of work personalizes beautifully but in a single context. Another generalizes across contexts but treats every wearer the same. Almost nothing occupies the top right.</p>
+
+  <figure>
+    <div class="fig-body">
+      <svg viewBox="0 0 720 470" role="img" aria-label="A two-by-two positioning map. The horizontal axis is generalization across ambulation contexts; the vertical axis is personalization to the individual. Zhang 2017, Lee 2023 and Slade 2022 sit high on personalization but low to middling on context. Tourk 2025 and the universal exoskeleton system sit high on context but low on personalization. The upper-right quadrant, high on both, is empty and marked as this project's target.">
+        <!-- quadrant tint -->
+        <rect x="375" y="60" width="285" height="160" fill="var(--accent)" opacity="0.07"/>
+
+        <!-- quadrant divider -->
+        <g stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="4 4">
+          <line x1="375" y1="60" x2="375" y2="380"/>
+          <line x1="90" y1="220" x2="660" y2="220"/>
+        </g>
+
+        <!-- axes -->
+        <line x1="90" y1="380" x2="660" y2="380" stroke="var(--ink-soft)" stroke-width="1.5"/>
+        <line x1="90" y1="380" x2="90" y2="60" stroke="var(--ink-soft)" stroke-width="1.5"/>
+
+        <!-- axis labels -->
+        <text x="375" y="415" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="var(--ink)">generalizes across ambulation contexts &rarr;</text>
+        <text x="375" y="437" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--muted)">one speed, one grade &nbsp;&mdash;&nbsp; ramps, stairs, jogging, transitions</text>
+
+        <text x="30" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="var(--ink)" transform="rotate(-90 30 220)">personalized to the individual &rarr;</text>
+        <text x="52" y="220" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--muted)" transform="rotate(-90 52 220)">one policy for all &nbsp;&mdash;&nbsp; tuned per wearer</text>
+
+        <!-- plotted work -->
+        <g font-family="IBM Plex Mono, monospace" font-size="11.5">
+          <!-- Lee 2023 -->
+          <circle cx="180" cy="102" r="6" fill="var(--ink)"/>
+          <text x="194" y="99" fill="var(--ink)" font-weight="600">Lee 2023</text>
+          <text x="194" y="114" fill="var(--muted)" font-size="10">preference, ankle, 43 queries</text>
+
+          <!-- Zhang 2017 -->
+          <circle cx="165" cy="168" r="6" fill="var(--ink)"/>
+          <text x="179" y="165" fill="var(--ink)" font-weight="600">Zhang 2017</text>
+          <text x="179" y="180" fill="var(--muted)" font-size="10">HIL metabolic, ~1 hr</text>
+
+          <!-- Slade 2022 -->
+          <circle cx="330" cy="132" r="6" fill="var(--ink)"/>
+          <text x="344" y="129" fill="var(--ink)" font-weight="600">Slade 2022</text>
+          <text x="344" y="144" fill="var(--muted)" font-size="10">outdoors, 4&times; faster</text>
+
+          <!-- Tourk 2025 -->
+          <circle cx="512" cy="312" r="6" fill="var(--ink)"/>
+          <text x="498" y="309" fill="var(--ink)" font-weight="600" text-anchor="end">Tourk 2025</text>
+          <text x="498" y="324" fill="var(--muted)" font-size="10" text-anchor="end">EB60, drops assist when unsure</text>
+
+          <!-- universal -->
+          <circle cx="576" cy="345" r="6" fill="var(--ink)"/>
+          <text x="404" y="360" fill="var(--ink)" font-weight="600" text-anchor="end">universal exo (Sci. Adv.)</text>
+          <text x="404" y="374" fill="var(--muted)" font-size="10" text-anchor="end">mode-aware, user-independent</text>
+          <line x1="410" y1="352" x2="568" y2="345" stroke="var(--rule-strong)" stroke-width="1"/>
+        </g>
+
+        <!-- the gap -->
+        <circle cx="560" cy="120" r="26" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="5 4"/>
+        <circle cx="560" cy="120" r="5" fill="var(--accent)"/>
+        <text x="560" y="172" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="600" fill="var(--accent-ink)">our project</text>
+        <text x="560" y="189" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="10" fill="var(--muted)">preference that travels</text>
+
+        <!-- quadrant whisper -->
+        <text x="648" y="80" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="10" letter-spacing="1.5" fill="var(--accent-ink)" opacity="0.75">MOSTLY EMPTY</text>
+      </svg>
+    </div>
+    <figcaption><b>Positions are approximate</b> &mdash; the map is for framing an argument, not a systematic review. Placement reflects each paper's own stated scope and limitations.</figcaption>
+  </figure>
+
+  <p>Nobody has cleanly solved the transfer problem: <strong>how do you carry a person's learned preference across contexts without re-running the full procedure every time the terrain changes?</strong> At roughly 40 queries per context and six daily-life ambulation modes, that's 240 queries. Nobody will sit through that. Any result that meaningfully cuts the number is a real contribution &mdash; and it's narrow enough to actually finish in one semester.</p>
+</section>
+
+<!-- ============ SKILLS ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Groundwork</span>
+    <h2>What to shore up</h2>
+  </div>
+
+  <p>Be honest about which of these you already have. The gaps are what September is for.</p>
+
+  <div class="skills">
+    <div>
+      <h3>Biomechanics</h3>
+      <ul>
+        <li>The gait cycle: stance and swing, heel strike, mid-stance, push-off, toe-off. Everything is parameterized as <strong>% of stride</strong>.</li>
+        <li>Ankle kinematics &mdash; plantarflexion vs. dorsiflexion, which muscles the boot offloads (soleus, gastrocnemius), and why push-off is where the energy is.</li>
+        <li><strong>Gait phase estimation</strong>: the core real-time problem. Turning a noisy IMU and encoder stream into "we are 47% through this stride" so torque lands on time.</li>
+        <li>Why modes genuinely differ &mdash; stairs, ramps and level ground have different ankle moment profiles, not scaled versions of one.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Learning &amp; optimization</h3>
+      <ul>
+        <li><strong>Bayesian optimization</strong> and Gaussian processes &mdash; the standard tool for expensive, noisy, low-dimensional black-box objectives. The mathematical heart of the project.</li>
+        <li>Preference and dueling models: Bradley&ndash;Terry, soft-max response models, RankNet. Building a utility function out of ordinal comparisons.</li>
+        <li><strong>Active learning</strong> and acquisition functions &mdash; how the algorithm picks the <em>next</em> pair to show. "Sample efficient" is doing real work in that title; every wasted query costs 45 seconds of someone's patience.</li>
+        <li>CMA-ES and evolution strategies. Contextual bandits, transfer and warm-starting for part two.</li>
+        <li>Why human feedback is hard: noisy, non-stationary, order-dependent, subject to habituation. Design the protocol assuming all of it.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Engineering practice</h3>
+      <ul>
+        <li>Python: numpy, scipy, pandas, matplotlib, scikit-learn. PyTorch only once we reach RankNet-shaped work.</li>
+        <li>Real-time loops &mdash; sampling rates, latency, and why a fast control loop can't wait on a slow Python callback.</li>
+        <li>Reading hardware sensor streams; logging and timestamping data we can actually analyze afterwards.</li>
+        <li>Git from day one. Three people, one codebase.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOGISTICS ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Logistics</span>
+    <h2>The parts that quietly block people</h2>
+  </div>
+
+  <div class="flags">
+    <div class="flag urgent">
+      <span class="marker" aria-hidden="true"></span>
+      <span class="ftitle">Human subjects training</span>
+      <p>This is human-subjects research. We'll likely need <strong>CITI human subjects research training</strong> before any of us can be listed on a protocol or run participants. The certification takes a few hours; the approval paperwork has lead time on top. Ask Finn in the <em>first</em> meeting &mdash; this is the single most common thing that silently stalls first-years for a month.</p>
+    </div>
+    <div class="flag">
+      <span class="marker" aria-hidden="true"></span>
+      <span class="ftitle">Lab safety and orientation</span>
+      <p>Whatever the SAHM Lab space in AHG requires. Ask early, do it early.</p>
+    </div>
+    <div class="flag">
+      <span class="marker" aria-hidden="true"></span>
+      <span class="ftitle">You will be a pilot participant</span>
+      <p>We'll almost certainly wear the boot ourselves. Expect it &mdash; and pay attention to what it actually feels like. That intuition is genuinely useful when designing a preference interface.</p>
+    </div>
+  </div>
+
+  <h3>ME 177K deliverables to plan around</h3>
+  <ul class="deliverables">
+    <li><span>Project proposal, evaluated by the faculty committee</span><span class="meta">early term</span></li>
+    <li><span>Lab work with Finn, plus faculty consultation</span><span class="meta">3&ndash;5 hrs + 1 hr / wk</span></li>
+    <li><span>Bi-weekly lectures on ME research and careers</span><span class="meta">throughout</span></li>
+    <li><span>Team presentation &mdash; Process, Results, Deliverables</span><span class="meta">7 min + 3 min Q&amp;A</span></li>
+    <li><span>Poster session</span><span class="meta">end of term</span></li>
+    <li><span>Final report, evaluated by the faculty committee</span><span class="meta">end of term</span></li>
+  </ul>
+
+  <p style="margin-top:1.3rem">Two practical reads on that list. The proposal lands early enough that we'll be writing it while still learning the field &mdash; having the reading above already digested is exactly what makes it specific instead of vague. And because the final talk is framed around <em>Process</em>, we should <strong>document our dead ends as we go</strong>. In a one-semester project, a well-characterized failure is a legitimate result.</p>
+</section>
+
+<!-- ============ ASKS ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">First meeting</span>
+    <h2>Questions to bring to Finn</h2>
+  </div>
+
+  <p>Specific questions signal we did the reading. These are ordered so the early ones scope the work.</p>
+
+  <div class="asks">
+    <div class="askgroup">
+      <h3>Scope</h3>
+      <ol>
+        <li>Are we building on the Lee et al. RankNet-plus-evolutionary approach, or exploring Bayesian optimization and CoSpar-style methods as alternatives?</li>
+        <li>Is the deliverable a working real-time controller on the boot, or an offline study using existing preference data? What does success look like by December?</li>
+        <li>Which torque parameters are we tuning &mdash; the standard four, or something else?</li>
+      </ol>
+    </div>
+    <div class="askgroup">
+      <h3>Ambulation scenarios</h3>
+      <ol start="4">
+        <li>Which scenarios are actually in scope? Treadmill speeds only, or ramps and stairs too?</li>
+        <li>For generalization: context-conditioned models, transfer and warm-starting, or per-context re-optimization as the baseline?</li>
+      </ol>
+    </div>
+    <div class="askgroup">
+      <h3>Practicalities</h3>
+      <ol start="6">
+        <li>Do we need CITI human subjects training, and when should we start it?</li>
+        <li>Which ExoBoot model does the lab have, and what's the existing codebase &mdash; <code>opensourceleg</code>, <code>flexsea</code> directly, or a lab fork?</li>
+        <li>Is there existing SAHM Lab preference data we can analyze while we get up to speed on the hardware?</li>
+        <li>How would you split work across three of us? One option: hardware and control, learning algorithm, experimental protocol and analysis &mdash; with everyone reading everything.</li>
+      </ol>
+    </div>
+    <div class="askgroup">
+      <h3>Framing</h3>
+      <ol start="10">
+        <li>Who is the intended user population &mdash; people with mobility impairment, older adults, unimpaired augmentation? It changes what "preference" even means.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PLAN ============ -->
+<section>
+  <div class="sec-head">
+    <span class="tag">Next three weeks</span>
+    <h2>What to actually do</h2>
+  </div>
+
+  <p>Ordered because it genuinely is a sequence &mdash; each week's work depends on the last. Tick items off as we go.</p>
+
+  <div class="weeks">
+    <article class="week">
+      <header>
+        <span class="wnum">Week 1</span>
+        <span class="wname">Orient</span>
+      </header>
+      <ul>
+        <li class="task"><label><input type="checkbox" data-task="w1a"><span class="tasktext">Read Lee et al. 2023 properly; read Zhang et al. 2017 for context.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w1b"><span class="tasktext"><strong>Download the Dryad dataset</strong> and load it in Python. Reproduce something small &mdash; plot one subject's parameter trajectory across their forced-choice comparisons. Real work, day one, no hardware and no IRB.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w1c"><span class="tasktext">Email Finn with the questions above. Set a recurring meeting.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w1d"><span class="tasktext">Start CITI training if it's required.</span></label></li>
+      </ul>
+    </article>
+
+    <article class="week">
+      <header>
+        <span class="wnum">Week 2</span>
+        <span class="wname">Get technical</span>
+      </header>
+      <ul>
+        <li class="task"><label><input type="checkbox" data-task="w2a"><span class="tasktext">Read the uncertainty-aware ExoBoot paper. Clone <code>opensourceleg</code> and <code>Exoboot-Controller-VAS</code>; read the control loop even if we can't run it yet.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w2b"><span class="tasktext">Implement a toy 1-D or 2-D preference-based Bayesian optimization against a simulated user with a known hidden optimum plus noise. Best way to build intuition for sample efficiency &mdash; and it's a figure that goes straight into the proposal.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w2c"><span class="tasktext">Get into the lab. See the boot. Wear it if allowed.</span></label></li>
+      </ul>
+    </article>
+
+    <article class="week">
+      <header>
+        <span class="wnum">Week 3</span>
+        <span class="wname">Converge on a proposal</span>
+      </header>
+      <ul>
+        <li class="task"><label><input type="checkbox" data-task="w3a"><span class="tasktext">Read the tier-two papers.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w3b"><span class="tasktext">With Finn, pin down the specific question. A shape that works: <em>can a preference model learned on level-ground walking warm-start optimization on a 5&deg; incline, and cut the queries needed?</em> Falsifiable, measurable, and it lands in the gap.</span></label></li>
+        <li class="task"><label><input type="checkbox" data-task="w3c"><span class="tasktext">Draft the proposal. Set up the shared repo.</span></label></li>
+      </ul>
+    </article>
+  </div>
+
+  <p class="planfoot">Checkboxes are saved in your own browser only &mdash; they're a personal reading tracker, not shared team state.</p>
+</section>
+
+<div class="closer">
+  <p>The literature has converged on preference tuning that works beautifully in one context, and on mode-aware control that works for everyone in general and no one in particular. The bridge between them is still missing.</p>
+  <p class="kicker">That's our project. It's a good one.</p>
+</div>
+
+<div class="sources">
+  <h2>Sources</h2>
+  <ul>
+    <li><a href="https://www.me.utexas.edu/people/faculty-directory/fey">Nick Fey &mdash; Walker Dept. of Mechanical Engineering</a></li>
+    <li><a href="https://robotics.utexas.edu/news/230">Nick Fey &mdash; Texas Robotics</a></li>
+    <li><a href="https://robotics.utexas.edu/news/314">SAHM Lab at RehabWeek 2025</a></li>
+    <li><a href="https://scholar.google.com/citations?user=OsTih1gAAAAJ&amp;hl=en">Nicholas P. Fey &mdash; Google Scholar</a></li>
+    <li><a href="https://www.linkedin.com/in/finn-eagen-2114631a1/">Finn Eagen &mdash; LinkedIn</a></li>
+    <li><a href="https://www.science.org/doi/10.1126/scirobotics.adg3705">Lee et al. &mdash; Science Robotics 2023</a></li>
+    <li><a href="https://datadryad.org/dataset/doi:10.5061/dryad.p5hqbzktp">Dryad &mdash; preference optimization dataset</a></li>
+    <li><a href="https://www.science.org/doi/10.1126/science.aal5054">Zhang et al. &mdash; Science 2017</a></li>
+    <li><a href="https://www.science.org/doi/10.1126/scirobotics.abj3487">Ingraham et al. &mdash; Science Robotics 2022</a></li>
+    <li><a href="https://arxiv.org/html/2508.21221v1">Tourk et al. &mdash; arXiv 2508.21221</a></li>
+    <li><a href="https://arxiv.org/html/2502.15366v1">Rapid Online Learning of Hip Exoskeleton Preferences</a></li>
+    <li><a href="https://arxiv.org/abs/1909.12316">Tucker et al. &mdash; CoSpar</a></li>
+    <li><a href="https://www.nature.com/articles/s41586-022-05191-1">Slade et al. &mdash; Nature 2022</a></li>
+    <li><a href="https://www.science.org/doi/10.1126/sciadv.adq0288">Universal lower-limb exoskeleton &mdash; Science Advances</a></li>
+    <li><a href="https://exoskeletonreport.com/product/exoboot/">Dephy Sidekick / ExoBoot</a></li>
+    <li><a href="https://neurobionics.robotics.umich.edu/research/biomechanical-science/dephy-ankle-exoskeletons/">Dephy ankle exoskeletons &mdash; Michigan Neurobionics</a></li>
+    <li><a href="https://github.com/DephyInc/Actuator-Package">DephyInc/Actuator-Package</a></li>
+    <li><a href="https://github.com/neurobionics/opensourceleg">neurobionics/opensourceleg</a></li>
+    <li><a href="https://github.com/neurobionics/Exoboot-Controller-VAS">neurobionics/Exoboot-Controller-VAS</a></li>
+    <li><a href="https://fisd.utexas.edu/grants-fellowships/provosts-teaching-fellows/initiatives/freshman-introduction-research-engineering">FIRE program &mdash; UT Austin</a></li>
+    <li><a href="https://catalog.utexas.edu/search/?P=M+E+177K">ME 177K &mdash; UT Austin catalog</a></li>
+  </ul>
+</div>
+
+</div>
+
+<script>
+(function () {
+  var KEY = "exoboot-brief-tasks-v1";
+  var boxes = document.querySelectorAll('input[type="checkbox"][data-task]');
+  var saved = {};
+
+  try {
+    var raw = window.localStorage.getItem(KEY);
+    if (raw) saved = JSON.parse(raw) || {};
+  } catch (e) { saved = {}; }
+
+  boxes.forEach(function (box) {
+    if (saved[box.dataset.task]) box.checked = true;
+    box.addEventListener("change", function () {
+      saved[box.dataset.task] = box.checked;
+      try {
+        window.localStorage.setItem(KEY, JSON.stringify(saved));
+      } catch (e) { /* private mode, blocked storage — ticks still work for this visit */ }
+    });
+  });
+})();
+</script>
