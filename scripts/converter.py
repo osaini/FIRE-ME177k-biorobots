@@ -84,13 +84,13 @@ def torque_to_opensim(tz):
 
 
 def foot_columns(row, side):
-    """Force, COP, and torque for one foot, in OpenSim axes (9 values)."""
+    """One foot in OpenSim axes: (force + COP, 6 values), (torque, 3 values)."""
     fx = getattr(row, f"Fx_{side}")
     fy = getattr(row, f"Fy_{side}")
     fz = getattr(row, f"Fz_{side}")
 
     if fz < FZ_MIN:
-        return [0.0] * 9
+        return [0.0] * 6, [0.0] * 3
 
     mx = getattr(row, f"Mx_{side}") * MOMENT_CAL["Mx"] / MOMENT_GAIN
     my = getattr(row, f"My_{side}") * MOMENT_CAL["My"] / MOMENT_GAIN
@@ -101,15 +101,21 @@ def foot_columns(row, side):
     force = force_to_opensim(fx, fy, fz)
     point = point_to_opensim(cx, cy)
     torque = torque_to_opensim(tz)
-    return [*force, *point, *torque]
+    return [*force, *point], list(torque)
+
+
+# Right foot has no prefix, left foot is "1_". Order: right force + COP,
+# left force + COP, right torque, left torque.
+PREFIXES = ("", "1_")
 
 
 def column_names():
     names = ["time"]
-    for side in ("r", "l"):
-        names += [f"ground_force_{side}_v{a}" for a in "xyz"]
-        names += [f"ground_force_{side}_p{a}" for a in "xyz"]
-        names += [f"ground_torque_{side}_{a}" for a in "xyz"]
+    for prefix in PREFIXES:
+        names += [f"{prefix}ground_force_v{a}" for a in "xyz"]
+        names += [f"{prefix}ground_force_p{a}" for a in "xyz"]
+    for prefix in PREFIXES:
+        names += [f"{prefix}ground_torque_{a}" for a in "xyz"]
     return names
 
 
@@ -129,7 +135,9 @@ def convert(trial):
         f.write("\t".join(names) + "\n")
 
         for row in walking.itertuples(index=False):
-            values = [row.rel_time, *foot_columns(row, "R"), *foot_columns(row, "L")]
+            r_force_cop, r_torque = foot_columns(row, "R")
+            l_force_cop, l_torque = foot_columns(row, "L")
+            values = [row.rel_time, *r_force_cop, *l_force_cop, *r_torque, *l_torque]
             f.write("\t".join(f"{v:.6f}" for v in values) + "\n")
 
     t0, t1 = walking["rel_time"].iloc[[0, -1]]
@@ -137,5 +145,9 @@ def convert(trial):
 
 
 if __name__ == "__main__":
+    for old in OUT_DIR.glob("*_grf.mot"):
+        old.unlink()
+        print(f"Removed {old.relative_to(ROOT)}")
+
     for trial in TRIALS:
         convert(trial)
